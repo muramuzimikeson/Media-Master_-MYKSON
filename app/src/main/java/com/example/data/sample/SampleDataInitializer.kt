@@ -237,22 +237,22 @@ object SampleDataInitializer {
             )
             database.documentDao().insertDocuments(docEntities)
 
-            // 6. Generate Sample Offline Audio (Real Synthesized WAV)
+            // 6. Copy Sample Offline Audio from assets
             val audio1 = File(mediaDir, "Midnight_Lofi_Chill.wav")
-            WavAudioGenerator.generateTrack(audio1, 22, WavAudioGenerator.TrackStyle.LOFI_CHILL)
+            copyAssetFile(context, "audio_lofi.wav", audio1)
 
             val audio2 = File(mediaDir, "Cyberpunk_Pulse_Drive.wav")
-            WavAudioGenerator.generateTrack(audio2, 20, WavAudioGenerator.TrackStyle.CYBER_PULSE)
+            copyAssetFile(context, "audio_cyber.wav", audio2)
 
             val audio3 = File(mediaDir, "Acoustic_Dawn_Serenade.wav")
-            WavAudioGenerator.generateTrack(audio3, 24, WavAudioGenerator.TrackStyle.ACOUSTIC_DAWN)
+            copyAssetFile(context, "audio_acoustic.wav", audio3)
 
             val mediaEntities = mutableListOf(
                 MediaEntity(
                     title = "Midnight Lo-Fi Echoes",
                     artist = "Master Acoustics",
                     album = "Offline Sanctuary",
-                    durationMs = 22_000,
+                    durationMs = 5_000,
                     uriString = Uri.fromFile(audio1).toString(),
                     filePath = audio1.absolutePath,
                     mediaType = MediaType.AUDIO.name,
@@ -264,7 +264,7 @@ object SampleDataInitializer {
                     title = "Cyberpunk Pulse Drive",
                     artist = "Neon Matrix",
                     album = "Synthetic City",
-                    durationMs = 20_000,
+                    durationMs = 5_000,
                     uriString = Uri.fromFile(audio2).toString(),
                     filePath = audio2.absolutePath,
                     mediaType = MediaType.AUDIO.name,
@@ -276,7 +276,7 @@ object SampleDataInitializer {
                     title = "Acoustic Dawn Serenade",
                     artist = "Horizon Harmonic",
                     album = "Mellow Moments",
-                    durationMs = 24_000,
+                    durationMs = 5_000,
                     uriString = Uri.fromFile(audio3).toString(),
                     filePath = audio3.absolutePath,
                     mediaType = MediaType.AUDIO.name,
@@ -286,22 +286,23 @@ object SampleDataInitializer {
                 )
             )
 
-            // 7. Generate Sample Video (Real MP4)
+            // 7. Initialize Sample Video from assets
             val videoFile = File(mediaDir, "MediaMaster_Showcase_HD.mp4")
-            val videoCreated = SampleVideoGenerator.generateSampleMp4(videoFile, 6, 640, 480)
-            if (videoCreated && videoFile.exists() && videoFile.length() > 5000) {
+            copyAssetFile(context, "sample_video.mp4", videoFile)
+
+            if (videoFile.exists() && videoFile.length() > 1000) {
                 mediaEntities.add(
                     MediaEntity(
                         title = "MediaMaster Offline Cinema Showcase",
                         artist = "MediaMaster Studio",
-                        album = "4K Spectrum Demos",
-                        durationMs = 6_000,
+                        album = "Offline Demos",
+                        durationMs = 5_000,
                         uriString = Uri.fromFile(videoFile).toString(),
                         filePath = videoFile.absolutePath,
                         mediaType = MediaType.VIDEO.name,
                         fileSizeBytes = videoFile.length(),
                         isFavorite = true,
-                        genre = "Visual Spectrum"
+                        genre = "Visual Demo"
                     )
                 )
             }
@@ -507,5 +508,19 @@ object SampleDataInitializer {
             document.writeTo(fos)
         }
         document.close()
+    }
+
+    private fun copyAssetFile(context: Context, assetName: String, destination: File) {
+        if (!destination.exists() || destination.length() < 100) {
+            try {
+                context.assets.open(assetName).use { input ->
+                    FileOutputStream(destination).use { output ->
+                        input.copyTo(output)
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed copying asset $assetName: ${e.message}")
+            }
+        }
     }
 }

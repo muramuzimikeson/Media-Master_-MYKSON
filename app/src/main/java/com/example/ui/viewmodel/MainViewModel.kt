@@ -40,6 +40,7 @@ enum class AppScreen {
     DOCUMENTS,
     MUSIC,
     VIDEOS,
+    FILE_EXPLORER,
     DOCUMENT_READER,
     FULLSCREEN_MUSIC,
     FULLSCREEN_VIDEO
@@ -443,6 +444,68 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             }
         } catch (ignored: Exception) {}
         return size
+    }
+
+    fun openLocalFile(file: File) {
+        if (!file.exists() || file.isDirectory) return
+        val fileName = file.name
+        val lower = fileName.lowercase()
+        val isAudio = lower.endsWith(".mp3") || lower.endsWith(".wav") ||
+                lower.endsWith(".flac") || lower.endsWith(".aac") ||
+                lower.endsWith(".m4a") || lower.endsWith(".ogg")
+        val isVideo = lower.endsWith(".mp4") || lower.endsWith(".mkv") ||
+                lower.endsWith(".webm") || lower.endsWith(".3gp")
+
+        viewModelScope.launch {
+            if (isAudio) {
+                val existing = database.mediaDao().getMediaByUri(Uri.fromFile(file).toString())
+                val targetMedia = existing ?: MediaEntity(
+                    title = fileName.substringBeforeLast("."),
+                    artist = "Local Storage",
+                    album = file.parentFile?.name ?: "Offline",
+                    durationMs = 0L,
+                    uriString = Uri.fromFile(file).toString(),
+                    filePath = file.absolutePath,
+                    mediaType = MediaType.AUDIO.name,
+                    fileSizeBytes = file.length()
+                ).also {
+                    val id = mediaRepo.insertMedia(it)
+                }
+                playAudio(targetMedia)
+                showMessage("Playing: ${targetMedia.title}")
+            } else if (isVideo) {
+                val existing = database.mediaDao().getMediaByUri(Uri.fromFile(file).toString())
+                val targetMedia = existing ?: MediaEntity(
+                    title = fileName.substringBeforeLast("."),
+                    artist = "Local Video",
+                    album = file.parentFile?.name ?: "Offline",
+                    durationMs = 0L,
+                    uriString = Uri.fromFile(file).toString(),
+                    filePath = file.absolutePath,
+                    mediaType = MediaType.VIDEO.name,
+                    fileSizeBytes = file.length()
+                ).also {
+                    mediaRepo.insertMedia(it)
+                }
+                videoPlayer.prepareAndPlay(targetMedia)
+                openVideo(targetMedia)
+            } else {
+                val existing = database.documentDao().getDocumentByUri(Uri.fromFile(file).toString())
+                val docType = DocumentType.fromExtensionOrMime(fileName)
+                val targetDoc = existing ?: DocumentEntity(
+                    title = fileName,
+                    uriString = Uri.fromFile(file).toString(),
+                    filePath = file.absolutePath,
+                    fileType = docType.name,
+                    fileSizeBytes = file.length(),
+                    totalPages = 1,
+                    tags = docType.extensionBadge
+                ).also {
+                    documentRepo.insertDocument(it)
+                }
+                openDocument(targetDoc)
+            }
+        }
     }
 
     override fun onCleared() {

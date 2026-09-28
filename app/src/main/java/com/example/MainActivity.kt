@@ -14,10 +14,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material.icons.outlined.Description
+import androidx.compose.material.icons.outlined.FolderOpen
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.MusicNote
 import androidx.compose.material.icons.outlined.Videocam
@@ -43,6 +45,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.ui.components.MiniPlayerBar
 import com.example.ui.screens.DocumentReaderScreen
 import com.example.ui.screens.DocumentsScreen
+import com.example.ui.screens.FileExplorerScreen
 import com.example.ui.screens.HomeScreen
 import com.example.ui.screens.MusicPlayerScreen
 import com.example.ui.screens.MusicScreen
@@ -134,6 +137,13 @@ fun MainAppScreen(viewModel: MainViewModel) {
                                 selectedIcon = Icons.Filled.Videocam,
                                 unselectedIcon = Icons.Outlined.Videocam,
                                 testTag = "nav_videos"
+                            ),
+                            NavigationItem(
+                                screen = AppScreen.FILE_EXPLORER,
+                                title = "Files",
+                                selectedIcon = Icons.Filled.FolderOpen,
+                                unselectedIcon = Icons.Outlined.FolderOpen,
+                                testTag = "nav_files"
                             )
                         )
 
@@ -178,6 +188,10 @@ fun MainAppScreen(viewModel: MainViewModel) {
                 AppScreen.DOCUMENTS -> DocumentsScreen(viewModel = viewModel)
                 AppScreen.MUSIC -> MusicScreen(viewModel = viewModel)
                 AppScreen.VIDEOS -> VideosScreen(viewModel = viewModel)
+                AppScreen.FILE_EXPLORER -> FileExplorerScreen(
+                    viewModel = viewModel,
+                    onNavigateBack = { viewModel.navigateTo(AppScreen.HOME) }
+                )
                 AppScreen.DOCUMENT_READER -> DocumentReaderScreen(
                     viewModel = viewModel,
                     onBack = { viewModel.navigateTo(AppScreen.DOCUMENTS) }

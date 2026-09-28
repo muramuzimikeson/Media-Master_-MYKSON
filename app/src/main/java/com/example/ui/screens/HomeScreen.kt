@@ -94,6 +94,7 @@ fun HomeScreen(
         // App Header Banner
         item {
             HeaderBanner(
+                onBrowseFiles = { viewModel.navigateTo(AppScreen.FILE_EXPLORER) },
                 onImportClick = {
                     filePickerLauncher.launch(
                         arrayOf(
@@ -187,6 +188,7 @@ fun HomeScreen(
 
 @Composable
 private fun HeaderBanner(
+    onBrowseFiles: () -> Unit,
     onImportClick: () -> Unit
 ) {
     Card(
@@ -251,24 +253,47 @@ private fun HeaderBanner(
                     modifier = Modifier.padding(vertical = 6.dp)
                 )
 
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
-                Button(
-                    onClick = onImportClick,
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
-                    ),
-                    modifier = Modifier.testTag("home_import_files_button")
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.FileUpload,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Import Any File Offline")
+                    Button(
+                        onClick = onBrowseFiles,
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary
+                        ),
+                        modifier = Modifier
+                            .weight(1f)
+                            .testTag("home_browse_storage_button")
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.FolderOpen,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text("Browse Storage")
+                    }
+
+                    OutlinedButton(
+                        onClick = onImportClick,
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier
+                            .weight(1f)
+                            .testTag("home_import_files_button")
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.FileUpload,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text("Import Files")
+                    }
                 }
             }
         }
